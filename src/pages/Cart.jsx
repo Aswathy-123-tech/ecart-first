@@ -1,10 +1,39 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { incrementQuantity,decrementQuantity, empCart } from '../redux/slices/cartSlice'
+import { removeCartItem } from '../redux/slices/cartSlice'
 
 const Cart = () => {
+  const navigate = useNavigate()
+      const userCart = useSelector(state=>state.cartReducer)
+            const dispatch= useDispatch()
+
+      const [cartTotal,setCartTotal]= useState(0)
+      useEffect(()=>{
+        if(userCart?.length>0){
+          setCartTotal(userCart?.map(item=>item?.totalPrice).reduce((a1,a2)=>a1+a2))
+        }
+      },[userCart])
+
+    const  handledecrementQuantity = (product)=>{
+if(product?.quantity>1){
+  dispatch(decrementQuantity(product?.id))
+}else{
+  dispatch(removeCartItem(product?.id))
+}
+      }
+      const checkOut = ()=>{
+        dispatch(empCart())
+        alert("thanks for purchase")
+        navigate("/")
+      }
   return (
-    <div style={{paddingTop:"100ppx"}} className='0x-5'>
-      <>
+    <div style={{paddingTop:"100px"}} className='0x-5'>
+{
+  userCart?.length>0?
+        <>
       <h1 className='text-5xl font-bold text-blue-600'> cart summary...</h1>
       <div className='grid grid-cols-3 gap-4 mt-5'>
         <div className='col-span-2 border rounded p-5 shadow'>
@@ -22,31 +51,36 @@ const Cart = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>product name</td>
-                <td><img width={'70px'}  height={'70px'} src="https://n.nordstrommedia.com/it/d3f5a28c-5474-4d5e-881e-7f3ba16efc69.jpeg?h=509&w=750" alt="" /></td>
+              {
+                userCart?.map((product,index)=>(
+                                <tr>
+                <td>{index+1}</td>
+                <td>{product?.title}</td>
+                <td><img width={'70px'}  height={'70px'} src={product?.thumbnail} alt="" /></td>
                 <td>
                 <div className='flex'>
-                  <button className='font-bold'>-</button>
-                  <input style={{width:"40px"}} type="text" className='border p-1 rounded mx-2' value={12 } readOnly />
-                  <button className='font-bold'>+</button>
+              <button onClick={() => handledecrementQuantity(product)} className='font-bold'>-</button>
+                  <input style={{width:"40px"}} type="text" className='border p-1 rounded mx-2' value={product?.quantity } readOnly />
+                  <button onClick={()=>dispatch(incrementQuantity(product?.id))} className='font-bold'>+</button>
                 </div>
                 </td>
-                <td>$ 250</td>
-                <td><button className='text-red-600'><i className='fa-solid fa-trash'></i></button></td>
+                <td>$ {product?.totalPrice}</td>
+                <td><button onClick={()=>dispatch(removeCartItem(product?.id))} className='text-red-600'><i className='fa-solid fa-trash'></i></button></td>
               </tr>
+
+                ))
+              }
             </tbody>
           </table>
           <div className='float-right mt-5'>
-            <button className='bg-red-600 rounded p-2 text-white'>Empty cart</button>
+            <button onClick={()=>dispatch(empCart())} className='bg-red-600 rounded p-2 text-white'>Empty cart</button>
             <Link to={'/'} className='bg-blue-600 ms-3 rounded p-2 text-white'>Shop More</Link>
           </div>
         </div>
         <div className='col-span-1'>
           <div className='border rounded shadow p-5'>
-         <h2 className='text-2xl font-bold'> Total Amount: <span className='text-red-600'>$250</span></h2><hr/>
-         <button className='bg-green-600 rounded p-2 text-white w-full mt-4'> check out</button>
+         <h2 className='text-2xl font-bold'> Total Amount: <span className='text-red-600'>${cartTotal}</span></h2><hr/>
+         <button  onClick={checkOut} className='bg-green-600 rounded p-2 text-white w-full mt-4'> check out</button>
           </div>
           <div>
 
@@ -54,7 +88,13 @@ const Cart = () => {
         </div>
       </div>
       </>
+:
+<div className='flex justify-center items-center h-screen'>
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaDcyyLRfcJy6r5n0TQKZM4pyzmJe9pCqYvQ&s" alt="" />
+    <h1 className='text-3xl text-red-600'>Your cart is empty</h1>
+</div>
 
+}
     </div>
   )
 }

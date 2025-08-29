@@ -3,8 +3,11 @@ import Header from '../components/Header'
 import { useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToWishlist } from '../redux/slices/wishlistSlice'
+import { addToCart } from '../redux/slices/cartSlice'
 
 const View = () => {
+  
+  const userCart = useSelector(state => state.cartReducer)
   const dispatch = useDispatch()
   const userWishlist = useSelector(state=>state.wishlistReducer)
 
@@ -31,6 +34,16 @@ const View = () => {
         alert("product added to wishlist")
       }
     } 
+        const handleCart = ()=>{
+          dispatch(addToCart(product))
+      const existingProduct = userCart?.find(item=>item.id==id)
+      if (existingProduct){
+        alert("product quantity incremented")
+      }else{
+        alert("product added to cart")
+      }
+    } 
+
 
   
   return (
@@ -42,7 +55,7 @@ const View = () => {
                 <img width={'350px'} height={'250px'} src={product?.thumbnail} alt="" />
                      <div className='flex justify-between mt-5'>
               <button onClick={handleWishlist} className='bg-blue-700 rounded text-white p-2 m-3'>ADD TO WISHLIST</button>
-                    <button className='bg-green-700 rounded text-white p-2'>ADD TO CART</button>
+                    <button onClick={handleCart} className='bg-green-700 rounded text-white p-2'>ADD TO CART</button>
 
     
            </div>
@@ -63,7 +76,7 @@ const View = () => {
               product?.reviews?.map(item=>(
                 <div key={item.date} className='shadow border rounded p-2 mb-2'>
                   <h5>
-                    <span className='font-bold'>{item?.reviewerNmae}</span>:<span>{item?.comment}</span>
+                    <span className='font-bold'>{item?.reviewerName}</span>:<span>{item?.comment}</span>
                   </h5>
                   <p>Rating:{item?.rating}<i className='fa-solid fa-star text-yellow-400'></i></p>
                 </div>
